@@ -18,6 +18,7 @@ $(TXTINPUT): $(ZIPINPUT)
 $(FILTEREDINPUT): $(TXTINPUT)	
 	grep '|84100|ORANGE|' $< > $@ 
 	sed -i 's/,/./g' $@
+	sed -i -E 's/\|([0-9]{2})\/([0-9]{2})\/([0-9]{4})\|/\|\3-\2-\1\|/' $@
 $(DBFILE): schema.sql $(FILTEREDINPUT)
 	@echo 'Rebuilding Database...'
 	sqlite3 $@ < schema.sql
@@ -30,15 +31,12 @@ login: $(DBFILE)
 %.csv: %.sql $(DBFILE)
 	sqlite3 -init sqlite3.csv.init $(DBFILE) < $< > $@
 %.html: %.sql $(DBFILE)
-	echo '<h3><a href="https://github.com/philippegabriel/immo_db">repo on github</a></h3>' > $@
-	echo '<link rel="stylesheet" type="text/css" href="index.css">' >> $@
-	date >> $@
-	echo '<table border="1">' >> $@
-	sqlite3 -init sqlite3.html.init $(DBFILE) < $< >> $@
-	echo '</table>' >> $@	
+	sqlite3 -init sqlite3.html.init $(DBFILE) < $< > table.$@
+	m4 -Dtableinclude=table.$@ $@.m4 > $@
 clean:	
 	rm -f $(TARGETS)
 	rm -f $(DBFILE)
+	rm -f table.*
 reallyclean: clean
 	rm -f $(ZIPINPUT)
 	rm -f $(TXTINPUT)
