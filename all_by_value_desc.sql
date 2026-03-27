@@ -1,0 +1,2 @@
+select distinct Date_mutation as "Date Mutation",
+Nature_mutation as "Nature Mutation",Valeur_fonciere as "Valeur Foncière",No_voie as "Num. Voie",Type_de_voie as "Type de Voie",Voie,Code_postal as "Code Postal",Commune,Type_local as "Type Local",Surface_reelle_bati as "Surface réelle Batie",Nombre_pieces_principales as "Nombre Pièces principales",Surface_terrain as "Surface Terrain" from vf order by Valeur_fonciere desc;
