@@ -10,7 +10,7 @@ HTML:=$(addsuffix .html,$(basename $(SQLQUERIES)))
 TARGETS=$(CSV) $(HTML)
 all: $(TARGETS)
 $(ZIPINPUT):
-	wget https://$(LINK)
+	wget -nv https://$(LINK)
 download: $(ZIPINPUT)
 $(TXTINPUT): $(ZIPINPUT)
 	unzip $<

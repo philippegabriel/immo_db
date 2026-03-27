@@ -1,0 +1,24 @@
+name: Makefile Runner
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: sudo apt-get install -y sqlite3 unzip wget
+
+    - name: Create database
+      run: make db
+
+    - name: Create csv & HTML reports
+      run: make query
