@@ -1,24 +1,55 @@
-name: Makefile Runner
+name: Build and deploy
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: sudo apt-get install -y sqlite3 unzip wget
+      - name: Install prerequisites
+        run: sudo apt-get install -y sqlite3
 
-    - name: Create database
-      run: make db
+      - name: Build db
+        run: make db
 
-    - name: Create csv & HTML reports
-      run: make query
+      - name: Build reports
+        run: make query
+        
+      - name: Prepare site
+        run: |
+          mkdir site
+          cp *.html site/
+          cp *.csv site/
+          cp index.css site/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
