@@ -32,6 +32,9 @@ jobs:
           cp *.csv site/
           cp index.css site/
 
+      - name: Check site contents
+        run: ls -la site
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

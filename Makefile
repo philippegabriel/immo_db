@@ -1,28 +1,23 @@
 .PHONY: download db login clean reallyclean tmp
-LINK:=static.data.gouv.fr/resources/demandes-de-valeurs-foncieres/20251018-234902/valeursfoncieres-2025-s1.txt.zip
+LINK:=https://static.data.gouv.fr/resources/demandes-de-valeurs-foncieres-geolocalisees/20260424-090024/dvf.csv.gz
 ZIPINPUT:=$(notdir $(LINK))
 TXTINPUT:=$(basename $(ZIPINPUT))
 FILTEREDINPUT:=$(addsuffix .txt,$(basename $(TXTINPUT))-ORANGE)
-DBFILE:=dvf_orange.sqlite3
+DBFILE:=dvf.sqlite3
 SQLQUERIES:=all_by_value_desc.sql
 CSV:=$(addsuffix .csv,$(basename $(SQLQUERIES)))
 HTML:=$(addsuffix .html,$(basename $(SQLQUERIES)))
 TARGETS=$(CSV) $(HTML)
 all: $(TARGETS)
 $(ZIPINPUT):
-	wget -nv https://$(LINK)
+	wget -nv $(LINK)
 download: $(ZIPINPUT)
 $(TXTINPUT): $(ZIPINPUT)
-	unzip $<
-	mv "$$(unzip -Z1 $<)" $@
-$(FILTEREDINPUT): $(TXTINPUT)	
-	grep '|84100|ORANGE|' $< > $@ 
-	sed -i 's/,/./g' $@
-	sed -i -E 's/\|([0-9]{2})\/([0-9]{2})\/([0-9]{4})\|/\|\3-\2-\1\|/' $@
-$(DBFILE): schema.sql $(FILTEREDINPUT)
+	gunzip -k $<
+$(DBFILE): $(TXTINPUT)
 	@echo 'Rebuilding Database...'
 	sqlite3 $@ < schema.sql
-	sqlite3 --separator '|' $@ ".import $(FILTEREDINPUT) vf"
+	sqlite3 $@ ".import --csv --skip 1 $(TXTINPUT) dvf"
 db: $(DBFILE)
 query: $(TARGETS)
 	@echo "Querying database $(DBFILE)"	
